@@ -1,0 +1,13 @@
+{
+  "name": "nexuseval-demand-mesh",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Machine-native discovery and buyer-intent layer for NexusEval Marketing Preflight",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
