@@ -20,13 +20,18 @@ const PRODUCT = {
   terms: `${CORE}/terms.json`
 };
 
+const AGENT402_SELLER_INDEX =
+  "https://agent402.tools/api/index?seller=nexuseval.vercel.app";
+
 const SKUS = [
   {
     id: "quick-gate",
     name: "Quick Marketing Gate",
     price: 0.01,
     endpoint: `${CORE}/api/gate`,
-    routerEligible: true,
+    routerEligible: false,
+    purchasePath: "direct-x402",
+    agent402Status: "indexed-unpriced",
     intent:
       "PASS WARN BLOCK pre-publish quality gate for autonomous marketing agents"
   },
@@ -35,7 +40,9 @@ const SKUS = [
     name: "Single Marketing QA",
     price: 0.04,
     endpoint: `${CORE}/api/evaluate`,
-    routerEligible: true,
+    routerEligible: false,
+    purchasePath: "direct-x402",
+    agent402Status: "indexed-unpriced",
     intent:
       "evaluate one marketing asset, message, CTA, campaign brief or copy before publishing"
   },
@@ -45,6 +52,8 @@ const SKUS = [
     price: 0.49,
     endpoint: `${CORE}/api/evaluate/batch`,
     routerEligible: true,
+    purchasePath: "agent402-or-direct-x402",
+    agent402Status: "priced-router-eligible",
     intent:
       "evaluate multiple marketing assets in one agent purchase"
   },
@@ -54,6 +63,8 @@ const SKUS = [
     price: 2.99,
     endpoint: `${CORE}/api/evaluate/launch`,
     routerEligible: false,
+    purchasePath: "direct-x402",
+    agent402Status: "priced-direct",
     intent:
       "GO REVIEW NO-GO campaign launch readiness and prioritized remediation"
   },
@@ -63,6 +74,8 @@ const SKUS = [
     price: 9.99,
     endpoint: `${CORE}/api/evaluate/campaign`,
     routerEligible: false,
+    purchasePath: "direct-x402",
+    agent402Status: "priced-direct",
     intent:
       "portfolio-level audit for up to 50 campaign assets, recurring risks and weak assets"
   }
@@ -306,14 +319,21 @@ No account. No API key. No manual checkout required by the service.
 </section>
 
 <h2>Machine purchase ladder</h2>
+<p>
+<strong>Recommended first paid pilot:</strong>
+Batch Marketing QA at $0.49 USDC. It is the lowest-priced NexusEval route
+that Agent402 currently exposes with a machine-readable price.
+</p>
 <div class="grid">
 ${SKUS.map(
   x => `<div class="card">
 <strong>${esc(x.name)}</strong><br>
 $${x.price.toFixed(2)} USDC<br>
 <span class="small">${esc(x.intent)}</span><br>
-Agent402 external-router eligible:
-<strong>${x.routerEligible ? "yes" : "direct purchase"}</strong>
+Purchase path:
+<strong>${esc(x.purchasePath)}</strong><br>
+Agent402 state:
+<strong>${esc(x.agent402Status)}</strong>
 </div>`
 ).join("")}
 </div>
@@ -351,7 +371,12 @@ app.get("/resolve", (req, res) => {
     proposal: PRODUCT.proposal,
     agreement: PRODUCT.agreement,
     terms: PRODUCT.terms,
-    samplePayload: samplePayload(sku)
+    samplePayload: samplePayload(sku),
+    currentMarketplaceState: {
+      recommendedFirstPaidPilot: skuById("batch-qa"),
+      note:
+        "Agent402 currently reports a price for batch, launch and campaign routes. Quick and single routes are indexed but unpriced in its seller record."
+    }
   });
 });
 
@@ -363,7 +388,7 @@ app.get("/catalog.json", (_req, res) => {
     resolver:
       "https://nexuseval-demand-mesh.vercel.app/resolve?q={buyer-intent}",
     note:
-      "Agent402 external router currently fits NexusEval routes priced at or below $0.50; higher-priced offers are direct x402/Bazaar purchase paths."
+      "Agent402 currently reports machine-readable prices for batch, launch and campaign. Quick and single offers remain direct x402 paths until their Agent402 prices are repaired."
   });
 });
 
@@ -382,6 +407,28 @@ app.get("/buyer-kit.json", (_req, res) => {
       account: false,
       apiKey: false,
       manualCheckoutRequiredByService: false
+    },
+    recommendedFirstPaidPilot: {
+      reason:
+        "Lowest-priced NexusEval route currently exposed by Agent402 with a machine-readable price.",
+      offer: skuById("batch-qa"),
+      example: samplePayload(skuById("batch-qa"))
+    },
+    currentMarketplaceState: {
+      sellerIndex: AGENT402_SELLER_INDEX,
+      pricedRoutes: [
+        "/api/evaluate/batch",
+        "/api/evaluate/launch",
+        "/api/evaluate/campaign"
+      ],
+      indexedButUnpricedRoutes: [
+        "/api/gate",
+        "/api/evaluate",
+        "/api/evaluate/ad",
+        "/api/evaluate/landing",
+        "/api/evaluate/email",
+        "/api/evaluate/gtm"
+      ]
     },
     offers: SKUS.map(x => ({
       ...x,
@@ -450,17 +497,35 @@ app.get("/proof.json", async (_req, res) => {
   );
 
   try {
-    const r = await fetch(
-      "https://agent402.tools/api/index"
-    );
+    const r = await fetch(AGENT402_SELLER_INDEX);
     const x = await r.json();
 
-    const raw = JSON.stringify(x);
+    const tools = Array.isArray(x.tools) ? x.tools : [];
+    const pricedTools = tools.filter(
+      tool => Number.isFinite(tool.price)
+    );
+    const unpricedTools = tools.filter(
+      tool => !Number.isFinite(tool.price)
+    );
 
     result.checks.agent402 = {
       reachable: r.ok,
-      containsNexusEvalOrigin:
-        raw.includes("nexuseval.vercel.app")
+      indexed: x.origin === CORE,
+      origin: x.origin || null,
+      originResponded: Boolean(x.originResponded),
+      health: x.health ?? null,
+      routable: Boolean(x.routable),
+      toolCount: tools.length,
+      pricedToolCount: pricedTools.length,
+      allRoutesPriced:
+        tools.length > 0 && pricedTools.length === tools.length,
+      pricedTools: pricedTools.map(tool => ({
+        route: tool.route,
+        price: tool.price,
+        networks: tool.networks || []
+      })),
+      unpricedRoutes: unpricedTools.map(tool => tool.route),
+      sellerIndex: AGENT402_SELLER_INDEX
     };
   } catch (e) {
     result.checks.agent402 = {
@@ -506,7 +571,9 @@ Endpoint:
 
 <p>
 Agent402 external-router eligible:
-<strong>${sku.routerEligible ? "yes" : "no — direct x402 purchase"}</strong>
+<strong>${sku.routerEligible ? "yes" : "no — direct x402 purchase"}</strong><br>
+Current Agent402 state:
+<strong>${esc(sku.agent402Status)}</strong>
 </p>
 
 <h2>Example request body</h2>
@@ -563,10 +630,12 @@ ${PRODUCT.proposal}
 Standard agreement:
 ${PRODUCT.agreement}
 
-Best low-friction routes:
+Recommended first paid pilot:
+$0.49 batch QA (priced in Agent402 and direct x402)
+
+Direct routes currently indexed but unpriced in Agent402:
 $0.01 PASS/WARN/BLOCK gate
 $0.04 single QA
-$0.49 batch QA
 
 Premium direct routes:
 $2.99 launch readiness
@@ -711,10 +780,14 @@ app.get(
   }
 );
 
-const port = process.env.PORT || 3000;
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(
-    `NexusEval Demand Mesh listening on ${port}`
-  );
-});
+  app.listen(port, () => {
+    console.log(
+      `NexusEval Demand Mesh listening on ${port}`
+    );
+  });
+}
+
+module.exports = app;
