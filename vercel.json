@@ -2,6 +2,26 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/api/current-state?surface=home"
+    },
+    {
+      "source": "/resolve",
+      "destination": "/api/current-state?surface=resolve"
+    },
+    {
+      "source": "/catalog.json",
+      "destination": "/api/current-state?surface=catalog"
+    },
+    {
+      "source": "/buyer-kit.json",
+      "destination": "/api/current-state?surface=buyer-kit"
+    },
+    {
+      "source": "/llms.txt",
+      "destination": "/api/current-state?surface=llms"
+    },
+    {
       "source": "/pilot",
       "destination": "/api/pilot"
     },
