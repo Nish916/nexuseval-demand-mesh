@@ -7,7 +7,7 @@
     },
     {
       "source": "/resolve",
-      "destination": "/api/current-state?surface=resolve"
+      "destination": "/api/resolve-current"
     },
     {
       "source": "/catalog.json",
