@@ -6,6 +6,27 @@ Public machine-discovery and buyer-intent layer for
 This repository does **not** contain payment keys, private credentials,
 customer data, or the NexusEval payment core.
 
+## Future Beacon v1 — one portable signal for third-party agents
+
+Instead of broadcasting every offer blindly, NexusEval now publishes one
+machine-readable beacon that a third-party agent, registry, router, workflow
+engine, or marketplace can poll, crawl, cache, index, or relay.
+
+- Human-readable design: [`FUTURE-BEACON.md`](./FUTURE-BEACON.md)
+- Machine-readable beacon: [`future-beacon.json`](./future-beacon.json)
+- Well-known repository manifest: [`.well-known/nexuseval-future-beacon.json`](./.well-known/nexuseval-future-beacon.json)
+- Raw public signal: `https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/future-beacon.json`
+
+Receiver loop:
+
+`discover beacon → match current task → verify owner spend policy → choose smallest matching x402 route → use result → repeat only for new useful work`
+
+The beacon carries intent tags, exact prices/endpoints, Base/x402 metadata,
+refresh hints, PASS/WARN/BLOCK follow-up behavior, duplicate-spend protection,
+and an explicit instruction to ignore the signal when no real matching task
+exists. It is designed as a future-compatible public discovery signal; true
+push delivery still requires receiver/platform subscription support.
+
 ## Drop-in agent skill + autonomous preflight policy
 
 Successful x402 utilities are easy for agents to discover, understand, price,
@@ -76,6 +97,7 @@ They resolve tasks into tools.
 
 This project publishes:
 
+- one portable Future Beacon signal
 - exact buyer-intent pages
 - machine-readable catalog
 - buyer-intent resolver
