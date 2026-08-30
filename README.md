@@ -6,6 +6,25 @@ Public machine-discovery and buyer-intent layer for
 This repository does **not** contain payment keys, private credentials,
 customer data, or the NexusEval payment core.
 
+## Drop-in agent skill + autonomous preflight policy
+
+Successful x402 utilities are easy for agents to discover, understand, price,
+and call. NexusEval adds one more buyer-safety layer: a machine-readable policy
+that tells an agent **when to buy, when not to buy, how much to spend, and what
+to do with the result**.
+
+- Agent-readable install/usage skill: [`skill.md`](./skill.md)
+- Buyer-controlled purchase policy: [`agent-policy.json`](./agent-policy.json)
+- Framework-agnostic pre-action hooks: [`preflight-hooks.json`](./preflight-hooks.json)
+
+The intended integration is not "buy an audit whenever possible." It is:
+
+`customer-facing action → is QA economically justified? → smallest matching paid check → PASS/WARN/BLOCK or structured result → continue/review/stop`
+
+Buyer-side protections include smallest-route selection, no subscription,
+no auto-renew, a same-unchanged-artifact duplicate-spend guard, and a rule to
+check settlement/receipt evidence before retrying an ambiguous paid request.
+
 ## Try → Verify Value → Repeat Only When Useful
 
 For agents that want the smallest genuine paid proof before adopting a new tool:
@@ -65,6 +84,9 @@ This project publishes:
 - AI-readable `llms.txt`
 - sitemap + search metadata
 - synthetic integration benchmark
+- agent-native skill instructions
+- buyer-controlled spend/purchase policy
+- reusable pre-publish / pre-send / pre-launch hooks
 
 ## Commercial seller
 
