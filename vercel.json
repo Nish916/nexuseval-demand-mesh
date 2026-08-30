@@ -15,11 +15,11 @@
     },
     {
       "source": "/future-beacon.json",
-      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/future-beacon.json"
+      "destination": "/api/future-beacon"
     },
     {
       "source": "/.well-known/nexuseval-future-beacon.json",
-      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/.well-known/nexuseval-future-beacon.json"
+      "destination": "/api/future-beacon"
     },
     {
       "source": "/skill.md",
