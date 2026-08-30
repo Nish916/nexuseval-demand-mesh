@@ -1,0 +1,72 @@
+name: Live Production Smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify public Demand Mesh and x402 boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MESH="https://nexuseval-demand-mesh.vercel.app"
+          CORE="https://nexuseval.vercel.app"
+          TMP="$(mktemp -d)"
+          trap 'rm -rf "$TMP"' EXIT
+
+          echo "Checking RainDrop hit #1..."
+          code1=$(curl -sS --retry 2 --retry-delay 2 \
+            -D "$TMP/h1" -o "$TMP/b1" -w '%{http_code}' \
+            "$MESH/raindrop?q=before%20publishing%20an%20ad")
+          test "$code1" = "200"
+          jq -e '.spec == "nexuseval-raindrop/1.0" and .status == "active" and .hitId and .challenge' "$TMP/b1" >/dev/null
+          grep -qi '^x-nexus-signal: raindrop-v1' "$TMP/h1"
+          hit1=$(jq -r '.hitId' "$TMP/b1")
+          challenge1=$(jq -r '.challenge' "$TMP/b1")
+
+          echo "Checking RainDrop hit #2 freshness..."
+          code2=$(curl -sS --retry 2 --retry-delay 2 \
+            -D "$TMP/h2" -o "$TMP/b2" -w '%{http_code}' \
+            "$MESH/raindrop?q=before%20publishing%20an%20ad")
+          test "$code2" = "200"
+          hit2=$(jq -r '.hitId' "$TMP/b2")
+          challenge2=$(jq -r '.challenge' "$TMP/b2")
+          test -n "$hit2"
+          test -n "$challenge2"
+          test "$hit1" != "$hit2"
+          test "$challenge1" != "$challenge2"
+
+          echo "Checking Future Beacon..."
+          beacon_code=$(curl -sS --retry 2 --retry-delay 2 \
+            -o "$TMP/beacon" -w '%{http_code}' \
+            "$MESH/future-beacon.json")
+          test "$beacon_code" = "200"
+          jq -e '.spec == "nexuseval-future-beacon/1.0" and .status == "active"' "$TMP/beacon" >/dev/null
+
+          echo "Checking core unpaid x402 boundary..."
+          gate_code=$(curl -sS --retry 2 --retry-delay 2 \
+            -H 'content-type: application/json' \
+            -o "$TMP/gate" -w '%{http_code}' \
+            -X POST "$CORE/api/gate" \
+            --data '{"objective":"smoke test","audience":"test","headline":"test","copy":"test","cta":"test"}')
+          test "$gate_code" = "402"
+
+          {
+            echo "## Live production smoke: PASS"
+            echo "- RainDrop: HTTP 200"
+            echo "- RainDrop unique per hit: PASS"
+            echo "- Future Beacon: HTTP 200"
+            echo "- Core /api/gate unpaid boundary: HTTP 402"
+            echo "- Checked at: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          } >> "$GITHUB_STEP_SUMMARY"
