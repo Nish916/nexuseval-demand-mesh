@@ -1,10 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
+  "redirects": [
     {
       "source": "/",
-      "destination": "/api/current-state?surface=home"
-    },
+      "destination": "/pilot",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
     {
       "source": "/resolve",
       "destination": "/api/resolve-current"
