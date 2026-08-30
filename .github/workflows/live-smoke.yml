@@ -65,7 +65,7 @@ jobs:
 
           echo "Checking Future Beacon..."
           beacon_code=$(fetch_until "$MESH/future-beacon.json" "$TMP/beacon" "$TMP/hb" 200)
-          jq -e '.spec == "nexuseval-future-beacon/1.0" and .status == "active"' "$TMP/beacon" >/dev/null
+          jq -e '.spec == "nexuseval-future-beacon/1.1" and .status == "active" and .deliveryModel.dynamicPerHitChallenge == true' "$TMP/beacon" >/dev/null
 
           echo "Checking core unpaid x402 boundary..."
           gate_code=""
@@ -89,7 +89,7 @@ jobs:
             echo "## Live production smoke: PASS"
             echo "- RainDrop: HTTP 200"
             echo "- RainDrop unique per hit: PASS"
-            echo "- Future Beacon: HTTP 200"
+            echo "- Future Beacon v1.1: HTTP 200"
             echo "- Core /api/gate unpaid boundary: HTTP 402"
             echo "- Checked at: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           } >> "$GITHUB_STEP_SUMMARY"
