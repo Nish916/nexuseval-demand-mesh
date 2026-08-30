@@ -69,3 +69,7 @@ credential abuse, search spam, or synthetic revenue claims.
 
 This repository makes no customer, conversion, or revenue claim. A marketplace
 listing is discovery infrastructure, not evidence of demand or settlement.
+
+## Deployment
+
+Production is connected to this repository on Vercel. Commits to `main` trigger automatic deployments.
