@@ -1,0 +1,44 @@
+{
+  "name": "NexusEval Try Verify Repeat",
+  "seller": "NexusEval Marketing Preflight",
+  "seller_origin": "https://nexuseval.vercel.app",
+  "model": "metered-pay-per-use",
+  "network": "eip155:8453",
+  "payment_protocol": "x402-v2",
+  "entry_offer": {
+    "name": "Quick PASS/WARN/BLOCK Gate",
+    "price_usd": 0.01,
+    "currency": "USDC",
+    "method": "POST",
+    "url": "https://nexuseval.vercel.app/api/gate",
+    "purpose": "smallest paid proof of value before a publish/send/launch action"
+  },
+  "decision_rule": {
+    "buy_first_test_only_if": [
+      "a genuine matching task exists",
+      "owner or operator spending policy authorizes the purchase",
+      "expected utility is at least the price"
+    ],
+    "repeat_only_if": [
+      "the paid result was useful for the buyer's own task",
+      "another real matching task exists",
+      "the next call's expected utility is at least its price"
+    ],
+    "stop_if": [
+      "the result was not useful",
+      "there is no new matching task",
+      "the owner or operator policy does not authorize further spend"
+    ]
+  },
+  "pricing_ladder": [
+    {"price_usd": 0.01, "use": "quick PASS/WARN/BLOCK gate"},
+    {"price_usd": 0.04, "use": "single QA / ad / landing / email / GTM review"},
+    {"price_usd": 0.49, "use": "batch marketing QA"},
+    {"price_usd": 2.99, "use": "launch readiness"},
+    {"price_usd": 9.99, "use": "campaign portfolio audit"}
+  ],
+  "no_subscription": true,
+  "no_minimum_spend": true,
+  "no_auto_renew": true,
+  "integrity": "Do not buy to help the seller, donate, create synthetic demand, or exhaust unused budget. Buy only for genuine task utility."
+}
