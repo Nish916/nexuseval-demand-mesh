@@ -48,6 +48,21 @@ function sha256(input) {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
+function classifyClient(ua, observer) {
+  if (observer === "github-smoke" || /NexusEval-Smoke\/1\.0/i.test(ua)) {
+    return "self-smoke";
+  }
+  if (/agent402/i.test(ua)) return "agent402";
+  if (/payapi/i.test(ua)) return "payapi";
+  if (/x402scan|merit/i.test(ua)) return "x402scan";
+  if (/bot|crawler|spider|agent|ai-client|mcp/i.test(ua)) return "probable-bot";
+  if (/^curl\//i.test(ua) || /^wget\//i.test(ua) || /python-requests|httpx|axios|node-fetch|undici/i.test(ua)) {
+    return "programmatic-client";
+  }
+  if (/mozilla\//i.test(ua)) return "browser-like";
+  return "unknown-client";
+}
+
 module.exports = function handler(req, res) {
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.setHeader("Allow", "GET, HEAD");
@@ -60,8 +75,24 @@ module.exports = function handler(req, res) {
   const query = String((req.query && req.query.q) || "");
   const route = chooseRoute(query);
   const ua = String(req.headers["user-agent"] || "unknown");
+  const observer = String(req.headers["x-nexus-observer"] || "");
   const uaHash = sha256(ua).slice(0, 16);
+  const clientClass = classifyClient(ua, observer);
   const timeBucket = Math.floor(now.getTime() / 60000);
+
+  console.log(
+    JSON.stringify({
+      event: "nexuseval_raindrop_hit",
+      hitId,
+      method: req.method,
+      clientClass,
+      observer: observer === "github-smoke" ? "github-smoke" : observer ? "other-marked" : null,
+      uaHash,
+      queryHash: query ? sha256(query).slice(0, 16) : null,
+      selectedRoute: route.id,
+      observedAt: now.toISOString()
+    })
+  );
 
   const challengeSeed = [
     "nexuseval-raindrop-v1",
