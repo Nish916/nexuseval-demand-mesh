@@ -30,6 +30,8 @@ jobs:
             local code=""
             for attempt in 1 2 3 4 5 6; do
               code=$(curl -sS --connect-timeout 10 --max-time 20 \
+                -H 'user-agent: NexusEval-Smoke/1.0' \
+                -H 'x-nexus-observer: github-smoke' \
                 -D "$headers" -o "$body" -w '%{http_code}' "$url" || true)
               if [ "$code" = "$expected" ]; then
                 echo "$code"
@@ -71,6 +73,8 @@ jobs:
           gate_code=""
           for attempt in 1 2 3; do
             gate_code=$(curl -sS --connect-timeout 10 --max-time 20 \
+              -H 'user-agent: NexusEval-Smoke/1.0' \
+              -H 'x-nexus-observer: github-smoke' \
               -H 'content-type: application/json' \
               -D "$TMP/hg" -o "$TMP/gate" -w '%{http_code}' \
               -X POST "$CORE/api/gate" \
@@ -91,5 +95,6 @@ jobs:
             echo "- RainDrop unique per hit: PASS"
             echo "- Future Beacon v1.1: HTTP 200"
             echo "- Core /api/gate unpaid boundary: HTTP 402"
+            echo "- Self traffic marker: NexusEval-Smoke/1.0"
             echo "- Checked at: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           } >> "$GITHUB_STEP_SUMMARY"
