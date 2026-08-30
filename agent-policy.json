@@ -1,0 +1,94 @@
+{
+  "policyVersion": "1.0",
+  "service": "NexusEval Marketing Preflight",
+  "core": "https://nexuseval.vercel.app",
+  "protocol": "x402-v2",
+  "network": "eip155:8453",
+  "asset": "USDC",
+  "purpose": "Buyer-controlled pre-action marketing quality policy for autonomous agents.",
+  "purchaseRule": {
+    "requireRealMatchingTask": true,
+    "requireOwnerSpendAuthorization": true,
+    "requireExpectedUtilityAtLeastPrice": true,
+    "forbiddenReasons": [
+      "support-the-seller",
+      "donation",
+      "use-unused-budget",
+      "create-synthetic-demand",
+      "manufacture-marketplace-proof"
+    ]
+  },
+  "defaultMode": "smallest-useful-route",
+  "routes": [
+    {
+      "id": "quick-gate",
+      "priceUsd": 0.01,
+      "endpoint": "https://nexuseval.vercel.app/api/gate",
+      "useWhen": "A fast PASS/WARN/BLOCK decision is sufficient before a customer-facing action."
+    },
+    {
+      "id": "single-qa",
+      "priceUsd": 0.04,
+      "endpoint": "https://nexuseval.vercel.app/api/evaluate",
+      "useWhen": "One marketing asset needs deeper structured QA."
+    },
+    {
+      "id": "batch-qa",
+      "priceUsd": 0.49,
+      "endpoint": "https://nexuseval.vercel.app/api/evaluate/batch",
+      "useWhen": "Multiple marketing assets should be evaluated together."
+    },
+    {
+      "id": "launch-readiness",
+      "priceUsd": 2.99,
+      "endpoint": "https://nexuseval.vercel.app/api/evaluate/launch",
+      "useWhen": "The real task is campaign-level launch readiness."
+    },
+    {
+      "id": "campaign-audit",
+      "priceUsd": 9.99,
+      "endpoint": "https://nexuseval.vercel.app/api/evaluate/campaign",
+      "useWhen": "A full campaign portfolio requires cross-asset analysis."
+    }
+  ],
+  "preActionTriggers": [
+    "before-publish-ad",
+    "before-publish-social",
+    "before-send-marketing-email",
+    "before-send-lifecycle-email",
+    "before-deploy-landing-copy",
+    "before-campaign-launch",
+    "before-agent-to-agent-customer-facing-handoff"
+  ],
+  "quickGateDecisionPolicy": {
+    "PASS": "continue",
+    "WARN": "pause-and-review-concerns",
+    "BLOCK": "halt-customer-facing-action-until-resolved"
+  },
+  "duplicateSpendGuard": {
+    "enabled": true,
+    "rule": "Do not repurchase the same unchanged artifact at the same workflow stage. A materially changed artifact may justify a new check."
+  },
+  "retrySafety": {
+    "blindPaidRetry": false,
+    "rule": "After an ambiguous network failure, first check for existing settlement or receipt evidence before authorizing another payment."
+  },
+  "adoptionLoop": [
+    "real-task",
+    "smallest-justified-paid-check",
+    "inspect-result",
+    "repeat-only-if-useful-and-a-new-real-task-exists"
+  ],
+  "subscription": false,
+  "minimumSpend": 0,
+  "autoRenew": false,
+  "discovery": {
+    "catalog": "https://nexuseval-demand-mesh.vercel.app/catalog.json",
+    "resolver": "https://nexuseval-demand-mesh.vercel.app/resolve?q={task}",
+    "proof": "https://nexuseval-demand-mesh.vercel.app/proof.json",
+    "openapi": "https://nexuseval.vercel.app/openapi.json",
+    "proposal": "https://nexuseval.vercel.app/proposal.json",
+    "agreement": "https://nexuseval.vercel.app/agreement.json",
+    "terms": "https://nexuseval.vercel.app/terms.json"
+  }
+}
