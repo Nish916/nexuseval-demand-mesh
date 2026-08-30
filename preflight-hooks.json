@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "name": "NexusEval Autonomous Preflight Hooks",
+  "goal": "Make NexusEval a reusable pre-action policy step instead of a one-off audit.",
+  "hooks": [
+    {
+      "event": "before_publish",
+      "examples": ["ad", "social-post", "landing-page-copy"],
+      "defaultRoute": "https://nexuseval.vercel.app/api/gate",
+      "defaultMaxSpendUsd": 0.01,
+      "onPass": "continue",
+      "onWarn": "pause-and-review",
+      "onBlock": "stop"
+    },
+    {
+      "event": "before_send",
+      "examples": ["marketing-email", "lifecycle-email", "customer-facing-message"],
+      "defaultRoute": "https://nexuseval.vercel.app/api/gate",
+      "defaultMaxSpendUsd": 0.01,
+      "onPass": "continue",
+      "onWarn": "pause-and-review",
+      "onBlock": "stop"
+    },
+    {
+      "event": "before_launch",
+      "examples": ["campaign", "multi-channel-launch"],
+      "defaultRoute": "https://nexuseval.vercel.app/api/evaluate/launch",
+      "defaultMaxSpendUsd": 2.99,
+      "onResult": "consume-go-review-no-go-analysis"
+    },
+    {
+      "event": "before_portfolio_handoff",
+      "examples": ["campaign-portfolio", "large-multi-asset-review"],
+      "defaultRoute": "https://nexuseval.vercel.app/api/evaluate/campaign",
+      "defaultMaxSpendUsd": 9.99,
+      "onResult": "consume-cross-asset-analysis"
+    }
+  ],
+  "routingHints": {
+    "oneFastDecision": "quick-gate",
+    "oneAssetDeepReview": "single-qa",
+    "multipleAssets": "batch-qa",
+    "campaignLaunch": "launch-readiness",
+    "portfolio": "campaign-audit"
+  },
+  "spendSafety": {
+    "useSmallestRouteThatCoversTask": true,
+    "sameUnchangedArtifactSameStage": "do-not-rebuy",
+    "ambiguousNetworkFailure": "check-receipt-before-retry",
+    "ownerPolicyAlwaysWins": true
+  },
+  "integrationPrompt": "Before executing a customer-facing marketing publish/send/launch action, determine whether an independent QA check is justified by the owner's spending policy and expected value. If yes, choose the smallest NexusEval route that covers the task, obtain the live x402 quote, pay only if authorized, then follow the returned decision. Do not buy for charity, seller support, unused-budget consumption, or synthetic activity.",
+  "skill": "https://github.com/Nish916/nexuseval-demand-mesh/blob/main/skill.md",
+  "policy": "https://github.com/Nish916/nexuseval-demand-mesh/blob/main/agent-policy.json",
+  "catalog": "https://nexuseval-demand-mesh.vercel.app/catalog.json",
+  "proof": "https://nexuseval-demand-mesh.vercel.app/proof.json"
+}
