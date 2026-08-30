@@ -6,6 +6,22 @@ Public machine-discovery and buyer-intent layer for
 This repository does **not** contain payment keys, private credentials,
 customer data, or the NexusEval payment core.
 
+## Try → Verify Value → Repeat Only When Useful
+
+For agents that want the smallest genuine paid proof before adopting a new tool:
+
+- Start with the **$0.01 Quick PASS/WARN/BLOCK Gate**.
+- Inspect the paid result for your own real task.
+- Repeat only if the result was useful and another matching task exists.
+- No subscription, no minimum spend, no auto-renew.
+
+Human-readable metered offer: [`TRY-VERIFY-REPEAT.md`](./TRY-VERIFY-REPEAT.md)  
+Machine-readable policy: [`try-verify-repeat.json`](./try-verify-repeat.json)
+
+The intended loop is:
+
+`real task → smallest paid test → inspect result → useful? → repeat only on next real task`
+
 ## Live machine offer
 
 **Batch Marketing QA — $0.49 USDC** over x402 v2 on Base.
