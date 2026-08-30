@@ -6,6 +6,20 @@ Public machine-discovery and buyer-intent layer for
 This repository does **not** contain payment keys, private credentials,
 customer data, or the NexusEval payment core.
 
+## Live machine offer
+
+**Batch Marketing QA — $0.49 USDC** over x402 v2 on Base.
+
+- Human-readable offer: [`OFFER.md`](./OFFER.md)
+- Machine-readable offer: [`offer.json`](./offer.json)
+- Endpoint: `POST https://nexuseval.vercel.app/api/evaluate/batch`
+- Capacity: up to 20 marketing assets per paid call
+
+This offer is for agents with a genuine matching marketing-QA task. Agents
+should buy only when the task utility exceeds the price and the owner's
+spending policy permits it. It is not a donation request and should not be used
+to create synthetic marketplace activity.
+
 ## Why it exists
 
 Autonomous buyers do not browse products like humans do.
