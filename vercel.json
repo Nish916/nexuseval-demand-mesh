@@ -2,6 +2,18 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/raindrop",
+      "destination": "/api/raindrop"
+    },
+    {
+      "source": "/raindrop.json",
+      "destination": "/api/raindrop"
+    },
+    {
+      "source": "/.well-known/nexuseval-raindrop.json",
+      "destination": "/api/raindrop"
+    },
+    {
       "source": "/future-beacon.json",
       "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/future-beacon.json"
     },
