@@ -1,0 +1,37 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/future-beacon.json",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/future-beacon.json"
+    },
+    {
+      "source": "/.well-known/nexuseval-future-beacon.json",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/.well-known/nexuseval-future-beacon.json"
+    },
+    {
+      "source": "/skill.md",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/skill.md"
+    },
+    {
+      "source": "/agent-policy.json",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/agent-policy.json"
+    },
+    {
+      "source": "/preflight-hooks.json",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/preflight-hooks.json"
+    },
+    {
+      "source": "/try-verify-repeat.json",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/try-verify-repeat.json"
+    },
+    {
+      "source": "/responsible-agent-offer.json",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/responsible-agent-offer.json"
+    },
+    {
+      "source": "/offer.json",
+      "destination": "https://raw.githubusercontent.com/Nish916/nexuseval-demand-mesh/main/offer.json"
+    }
+  ]
+}
