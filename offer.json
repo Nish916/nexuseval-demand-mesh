@@ -1,26 +1,32 @@
 {
-  "offerId": "nexuseval-agent-pilot-2026-08",
+  "offerId": "nexuseval-marketing-preflight-gate-2026-09",
   "seller": "NexusEval Marketing Preflight",
   "status": "live",
   "audience": "Autonomous agents and workflow operators with a concrete marketing-quality task",
   "recommendedSku": {
-    "name": "Batch Marketing QA",
-    "endpoint": "https://nexuseval.vercel.app/api/evaluate/batch",
+    "name": "Quick Marketing Preflight Gate",
+    "endpoint": "https://nexuseval.vercel.app/api/gate",
     "method": "POST",
-    "priceUsd": 0.49,
+    "priceUsd": 0.01,
     "currency": "USDC",
     "network": "eip155:8453",
     "protocol": "x402-v2",
-    "maxItems": 20
+    "outcome": "PASS/WARN/BLOCK with risk flags and recommended fixes"
   },
+  "sampleRequest": {
+    "content": "50% off today only. Start your free trial now.",
+    "channel": "ad",
+    "goal": "conversion"
+  },
+  "buyerValue": "For $0.01 USDC on Base, get an immediate structured preflight decision before publishing, sending, launching, approving, or handing off customer-facing marketing.",
   "bestFor": [
-    "QA multiple ads before publishing",
-    "QA email campaign variants before send",
-    "QA landing-page sections before launch",
-    "QA AI-generated marketing assets in an autonomous workflow",
-    "Batch preflight checks before a campaign is released"
+    "One last check before publishing an ad or CTA",
+    "Pre-send marketing email QA",
+    "Landing-page or GTM message preflight",
+    "Fast independent QA of AI-generated marketing copy",
+    "Agent workflows that need a cheap PASS/WARN/BLOCK decision before action"
   ],
-  "buyerDecisionRule": "Buy only when the agent has a real matching task, the expected utility exceeds the $0.49 price, and the agent owner's spending policy allows the purchase.",
+  "buyerDecisionRule": "Buy only when the agent has a real matching task, the expected utility exceeds the $0.01 price, and the agent owner's spending policy allows the purchase.",
   "doNotBuyFor": [
     "helping or donating to the seller",
     "creating artificial demand or marketplace volume",
@@ -28,20 +34,20 @@
     "an unrelated use case"
   ],
   "purchaseFlow": [
-    "POST a JSON body containing up to 20 marketing assets to the endpoint",
+    "POST the marketing content and context as JSON to /api/gate",
     "Receive an HTTP 402 x402-v2 payment challenge",
-    "Settle USDC on Base according to the returned payment requirements",
+    "Settle $0.01 USDC on Base according to the returned payment requirements",
     "Retry with the valid payment signature",
-    "Receive the structured JSON QA result and paid-delivery receipt support"
+    "Receive the structured PASS/WARN/BLOCK-style result with risks and recommended fixes"
   ],
   "proof": {
+    "externalVerification": "PayAPI performed one external verification/canary settlement; this is not an organic customer or organic revenue claim.",
     "core": "https://nexuseval.vercel.app",
-    "proposal": "https://nexuseval.vercel.app/proposal.json",
-    "agreement": "https://nexuseval.vercel.app/agreement.json",
     "pricing": "https://nexuseval.vercel.app/pricing.json",
     "openapi": "https://nexuseval.vercel.app/openapi.json",
+    "x402": "https://nexuseval.vercel.app/.well-known/x402",
     "publicProof": "https://nexuseval-demand-mesh.vercel.app/proof.json",
-    "buyerResolver": "https://nexuseval-demand-mesh.vercel.app/resolve?q=batch+marketing+qa"
+    "buyerResolver": "https://nexuseval-demand-mesh.vercel.app/resolve?q=marketing+preflight"
   },
   "integrity": "No self-purchase, fake reviews, fake customer claims, synthetic volume, or guaranteed revenue claims. A purchase is requested only when the tool matches a genuine buyer task."
 }
