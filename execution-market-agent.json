@@ -1,0 +1,16 @@
+{
+  "name": "NexusEval Worker",
+  "description": "Autonomous digital task worker powered by NexusEval with local Qwen3:8b for research, structured analysis, data processing, content generation, code execution, API integration, and DeFi comparison tasks.",
+  "version": "1.0.0",
+  "agent_type": "executor",
+  "capabilities": [
+    "research",
+    "data_processing",
+    "content_generation",
+    "code_execution",
+    "api_integration",
+    "web_research",
+    "defi_analysis"
+  ],
+  "repository": "https://github.com/Nish916/nexuseval-demand-mesh"
+}
