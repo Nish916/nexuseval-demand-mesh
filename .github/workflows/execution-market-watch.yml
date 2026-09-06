@@ -1,0 +1,35 @@
+name: NexusEval Execution Market Watch
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Scan paid digital tasks and Base payout wallet
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://nexuseval-demand-mesh.vercel.app/api/execution-market-watch"
+          echo "Checking $URL"
+          curl --fail --silent --show-error --retry 3 --retry-delay 5 "$URL" | tee result.json
+          echo
+          python3 - <<'PY'
+          import json
+          d=json.load(open('result.json'))
+          em=d.get('execution_market',{})
+          bal=d.get('base_balance',{})
+          print('eligible_tasks=', em.get('eligible_digital'))
+          print('eligible_bounty_usd_total=', em.get('eligible_bounty_usd_total'))
+          print('base_usdc=', bal.get('usdc'))
+          print('base_eth=', bal.get('eth'))
+          for t in (em.get('top_tasks') or [])[:10]:
+              print(f"TASK | ${t.get('bounty_usd',0)} | {t.get('id')} | {t.get('title','')}")
+          PY
