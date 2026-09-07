@@ -1,5 +1,9 @@
 # NexusEval Demand Mesh
 
+[![Powered by RustChain](https://img.shields.io/badge/Powered%20by-RustChain-orange)](https://rustchain.org)
+
+> Disclosure: this RustChain badge was added while participating in an openly posted RustChain bounty.
+
 Public machine-discovery and buyer-intent layer for
 [NexusEval Marketing Preflight](https://nexuseval.vercel.app).
 
