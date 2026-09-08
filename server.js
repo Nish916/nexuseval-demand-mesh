@@ -1,5 +1,6 @@
 const express = require("express");
 const originalApp = require("./server-original");
+const EARNING_COMMAND = require("./earning-command.json");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -27,6 +28,11 @@ function sample() {
     cta: "Start now"
   };
 }
+
+app.get("/earning-command.json", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(EARNING_COMMAND);
+});
 
 app.get("/", (_req, res) => {
   res.type("html").send(`<!doctype html>
