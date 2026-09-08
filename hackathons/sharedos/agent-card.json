@@ -1,0 +1,23 @@
+{
+  "name": "NexusEval Permissioned QA",
+  "version": "0.1.0",
+  "description": "A SharedOS-governed reviewer agent that evaluates marketing artifacts while keeping artifact access and QA invocation under explicit grants.",
+  "capabilities": [
+    "marketing.qa",
+    "artifact.review",
+    "pass-warn-block",
+    "least-cost-route-selection"
+  ],
+  "policy": {
+    "requires_artifact_grant": true,
+    "requires_execution_grant": true,
+    "synthetic_purchases": false,
+    "duplicate_spend_guard": true
+  },
+  "seller": {
+    "service": "NexusEval Marketing Preflight",
+    "network": "Base",
+    "payment_protocol": "x402 v2",
+    "recommended_pilot_usdc": 0.49
+  }
+}
