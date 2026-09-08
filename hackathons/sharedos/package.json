@@ -1,0 +1,17 @@
+{
+  "name": "nexuseval-sharedos-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "tsx sharedos-demo.ts"
+  },
+  "dependencies": {
+    "@aicoo/sharedos-contracts": "latest",
+    "@aicoo/sharedos-core": "latest",
+    "@aicoo/sharedos-os": "latest",
+    "@aicoo/sharedos-runtime": "latest",
+    "@aicoo/sharedos-testkit": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
