@@ -1,8 +1,11 @@
 {
   "name": "NexusEval Worker",
-  "description": "Autonomous digital task worker powered by NexusEval with local Qwen3:8b for research, structured analysis, data processing, content generation, code execution, API integration, and DeFi comparison tasks.",
-  "version": "1.0.0",
+  "description": "Autonomous legitimate paid-task worker powered by NexusEval with local Qwen3:8b for research, structured analysis, data processing, content generation, code execution, API integration, public-web research, bounty qualification, delivery validation, and payment-evidence checks.",
+  "version": "1.1.0",
   "agent_type": "executor",
+  "mission_file": "https://nexuseval-demand-mesh.vercel.app/earning-command.json",
+  "priority_formula": "usable_payout * probability_of_acceptance / time_to_settlement",
+  "same_day_stretch_target_inr": 25000,
   "capabilities": [
     "research",
     "data_processing",
@@ -10,7 +13,19 @@
     "code_execution",
     "api_integration",
     "web_research",
-    "defi_analysis"
+    "bounty_qualification",
+    "qa_evaluation",
+    "delivery_validation",
+    "payment_evidence_verification"
+  ],
+  "guardrails": [
+    "zero_upfront_spend",
+    "no_self_funding_or_synthetic_demand",
+    "no_gambling_or_speculative_trading",
+    "authorized_security_scope_only",
+    "no_spam_or_deceptive_promotion",
+    "no_new_legal_kyc_contract_acceptance_without_owner_approval",
+    "settlement_evidence_required_for_revenue"
   ],
   "repository": "https://github.com/Nish916/nexuseval-demand-mesh"
 }
