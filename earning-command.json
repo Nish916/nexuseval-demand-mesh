@@ -1,0 +1,66 @@
+{
+  "version": "2026-09-08.1",
+  "owner": "Nishant",
+  "mission": "Maximize legitimate newly earned and settled money with a same-day stretch target of INR 25000, without treating the target as a guarantee or forecast.",
+  "priority_formula": "expected_value = usable_payout * probability_of_acceptance / time_to_settlement",
+  "priority_order": [
+    "accepted paid work",
+    "warm buyer threads with a concrete paid milestone",
+    "direct-pay or escrow work worth 50-500+ USDC or INR equivalent",
+    "funded zero-upfront bounties and paid QA/evaluations",
+    "smaller high-probability micro-payments"
+  ],
+  "sources": [
+    "paid QA and evaluations",
+    "authorized bug bounties",
+    "open-source bounties",
+    "content and growth bounties",
+    "research and data tasks",
+    "consulting and RFPs",
+    "agent/API/x402 buyer requests",
+    "grants with near-term awards",
+    "referral and commission opportunities",
+    "microtasks and direct freelance projects"
+  ],
+  "verification_required": [
+    "opportunity is currently open",
+    "reward or buyer budget is real",
+    "India or global eligibility permits Nishant",
+    "exact deliverable and deadline are known",
+    "competition or claim state is checked",
+    "authorized submission or contact route is known",
+    "payout method and likely settlement timing are known",
+    "no prohibited upfront spend, stake, deposit, entry fee, or new legal/KYC acceptance is required"
+  ],
+  "execution": {
+    "same_run_when_safe": true,
+    "prefer_small_paid_milestone_before_full_speculative_work": true,
+    "submit_completed_work_through_authorized_route": true,
+    "respect_platform_ai_and_authenticity_rules": true,
+    "dedupe_key": "source + requester + task_or_issue_id + deliverable",
+    "stages": ["DISCOVERED", "QUALIFIED", "PROPOSED", "ACCEPTED", "DELIVERED", "PAYMENT_PENDING", "SETTLED"]
+  },
+  "never": [
+    "fabricate listings, buyers, proof, acceptance, awards, or payments",
+    "self-fund or wash transactions",
+    "gamble or trade speculatively",
+    "perform unauthorized security testing or bypass access controls",
+    "pay entry fees, bids, deposits, stakes, or worker bonds",
+    "spam or use deceptive promotion",
+    "accept legal terms, contracts, KYC, tax declarations, or signatures without explicit owner approval",
+    "change bank, wallet, or payment settings without explicit owner approval",
+    "count HTTP 402 probes, crawlers, test calls, bids, listings, or proposed fees as revenue"
+  ],
+  "known_watch_lines": [
+    "NexusEval / Agent402 / x402 / PayAPI external buyers and settlements",
+    "RustChain RTC awards, submissions, migration and settlement",
+    "Swing Edge / Ankur buyer thread",
+    "legitimate consulting/RFP threads",
+    "previously submitted QA, bounty, evaluation and referral work"
+  ],
+  "reporting": {
+    "notify_on": ["new actionable opportunity", "material buyer or blocker advance", "real payment or award including micro-payments"],
+    "separate_stage_from_revenue": true,
+    "show_remaining_inr_25000_gap_when_material_change_occurs": true
+  }
+}
