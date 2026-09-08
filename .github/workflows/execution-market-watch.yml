@@ -2,17 +2,34 @@ name: NexusEval Execution Market Watch
 
 on:
   schedule:
-    - cron: "7 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: nexuseval-execution-market-watch
+  cancel-in-progress: true
 
 jobs:
   scan:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Load central earning command
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 3 --retry-delay 5 \
+            "https://nexuseval-demand-mesh.vercel.app/earning-command.json" -o earning-command.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('earning-command.json'))
+          print('mission=', d.get('mission'))
+          print('priority_formula=', d.get('priority_formula'))
+          PY
+
       - name: Scan paid digital tasks and Base payout wallet
         shell: bash
         run: |
@@ -30,6 +47,6 @@ jobs:
           print('eligible_bounty_usd_total=', em.get('eligible_bounty_usd_total'))
           print('base_usdc=', bal.get('usdc'))
           print('base_eth=', bal.get('eth'))
-          for t in (em.get('top_tasks') or [])[:10]:
+          for t in (em.get('top_tasks') or [])[:20]:
               print(f"TASK | ${t.get('bounty_usd',0)} | {t.get('id')} | {t.get('title','')}")
           PY
