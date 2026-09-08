@@ -1,7 +1,8 @@
 const EXECUTION_MARKET = "https://api.execution.market";
 const BASE_RPC = "https://mainnet.base.org";
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-const PAYOUT_WALLET = "0xeD7E99F4a81CbaEeFe1B8eceDeBCdA812aa15C73";
+const PRIMARY_PAYOUT_WALLET = "0x756A9769725aF78F81fb0A9b66300aBb64A0551c";
+const LEGACY_PAYOUT_WALLET = "0xeD7E99F4a81CbaEeFe1B8eceDeBCdA812aa15C73";
 
 const DIGITAL_CATEGORIES = new Set([
   "research",
@@ -54,12 +55,13 @@ function bounty(t) {
   return Number.isFinite(n) ? n : 0;
 }
 
-async function getWalletBalances() {
-  const ethHex = await rpc("eth_getBalance", [PAYOUT_WALLET, "latest"]);
-  const balanceOfData = "0x70a08231" + PAYOUT_WALLET.slice(2).toLowerCase().padStart(64, "0");
+async function getWalletBalance(wallet) {
+  const ethHex = await rpc("eth_getBalance", [wallet, "latest"]);
+  const balanceOfData = "0x70a08231" + wallet.slice(2).toLowerCase().padStart(64, "0");
   const usdcHex = await rpc("eth_call", [{ to: USDC_BASE, data: balanceOfData }, "latest"]);
 
   return {
+    wallet,
     eth: Number(BigInt(ethHex)) / 1e18,
     usdc: Number(BigInt(usdcHex)) / 1e6,
   };
@@ -68,33 +70,34 @@ async function getWalletBalances() {
 export default async function handler(req, res) {
   try {
     const tasksResp = await fetch(`${EXECUTION_MARKET}/api/v1/tasks/available?limit=100`, {
-      headers: { "user-agent": "NexusEval-Cloud-Worker/1.0" },
+      headers: { "user-agent": "NexusEval-Cloud-Worker/1.1" },
     });
 
-    if (!tasksResp.ok) {
-      throw new Error(`Execution Market HTTP ${tasksResp.status}`);
-    }
+    if (!tasksResp.ok) throw new Error(`Execution Market HTTP ${tasksResp.status}`);
 
     const raw = await tasksResp.json();
-    const tasks = Array.isArray(raw)
-      ? raw
-      : raw.tasks || raw.data || raw.results || [];
+    const tasks = Array.isArray(raw) ? raw : raw.tasks || raw.data || raw.results || [];
+    const eligibleTasks = tasks.filter(eligible).sort((a, b) => bounty(b) - bounty(a));
 
-    const eligibleTasks = tasks
-      .filter(eligible)
-      .sort((a, b) => bounty(b) - bounty(a));
+    const walletResults = await Promise.allSettled([
+      getWalletBalance(PRIMARY_PAYOUT_WALLET),
+      getWalletBalance(LEGACY_PAYOUT_WALLET),
+    ]);
 
-    const balances = await getWalletBalances().catch((error) => ({
-      eth: null,
-      usdc: null,
-      error: error.message,
-    }));
+    const wallets = walletResults.map((r, i) => {
+      const wallet = i === 0 ? PRIMARY_PAYOUT_WALLET : LEGACY_PAYOUT_WALLET;
+      return r.status === "fulfilled" ? r.value : { wallet, eth: null, usdc: null, error: r.reason?.message || String(r.reason) };
+    });
+
+    const primary = wallets[0];
+    const legacy = wallets[1];
 
     const summary = {
       ok: true,
       checked_at: new Date().toISOString(),
-      payout_wallet: PAYOUT_WALLET,
-      base_balance: balances,
+      payout_wallet: PRIMARY_PAYOUT_WALLET,
+      base_balance: primary,
+      wallets: { primary, legacy },
       execution_market: {
         total_available: tasks.length,
         eligible_digital: eligibleTasks.length,
@@ -109,7 +112,7 @@ export default async function handler(req, res) {
         })),
       },
       mode: "cloud_scan_only",
-      note: "This cloud job discovers legitimate paid work and checks the payout wallet. Authenticated applications still require an ERC-8128 OWS signer; no wallet secret is stored in this repository.",
+      note: "Discovers legitimate paid work and checks both primary and legacy Base payout wallets. Authenticated applications still require an ERC-8128 OWS signer; no wallet secret is stored in this repository.",
     };
 
     console.log(JSON.stringify({
@@ -117,8 +120,8 @@ export default async function handler(req, res) {
       checked_at: summary.checked_at,
       eligible_tasks: eligibleTasks.length,
       eligible_bounty_usd_total: summary.execution_market.eligible_bounty_usd_total,
-      base_usdc: balances.usdc,
-      base_eth: balances.eth,
+      primary_base_usdc: primary.usdc,
+      legacy_base_usdc: legacy.usdc,
     }));
 
     res.setHeader("Cache-Control", "no-store");
