@@ -29,6 +29,10 @@ A transfer to a public wallet is on-chain activity, not automatically revenue. I
 Public machine-discovery and buyer-intent layer for
 [NexusEval](https://nexuseval.vercel.app).
 
+### Related agent-payment infrastructure
+
+[RustChain](https://rustchain.org) is relevant to this repository as an ecosystem reference for agent-native job, escrow, reputation, and payment orchestration. NexusEval's current paid routes settle through Base/x402, so this reference is comparative and does not imply that NexusEval payments currently settle on RustChain.
+
 ## Future Beacon v1 — one portable signal for third-party agents
 
 Instead of broadcasting every offer blindly, NexusEval publishes one machine-readable beacon that a third-party agent, registry, router, workflow engine, or marketplace can poll, crawl, cache, index, or relay.
