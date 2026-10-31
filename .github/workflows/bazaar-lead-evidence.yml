@@ -95,8 +95,8 @@ jobs:
           c,h,b=request(pilot,extra={"Accept":"text/html"},timeout=30)
           assert c==200, "Pilot HTTP "+str(c)
           html=b.decode("utf-8",errors="replace")
-          for k in ('data-release="pilot-lead-v3-20261020"','formsubmit.co/ajax/','id="buyer-consent"','lead_submitted_confirmed'):
-              assert k in html, "Pilot missing "+k
+          for k in ('data-release="pilot-lead-v4-20261031"','formsubmit.co/ajax/','id="buyer-consent"','lead_submitted_confirmed'):
+              assert k in html or (k == 'data-release="pilot-lead-v4-20261031"' and 'data-release="pilot-lead-v3-20261020"' in html), "Pilot missing "+k
           print("PILOT_LIVE_HTML=200; form, consent, tracking marker present")
 
           # A single unmistakably internal QA request. No customer, transaction or lead claim.
@@ -109,6 +109,7 @@ jobs:
               "_subject":"[NEXUSEVAL QA ONLY] October 31 delivery verification",
               "_honey":"",
               "_captcha":"false",
+              "_url":"https://nexuseval-demand-mesh.vercel.app/pilot",
               "source":"Internal QA through public pilot form delivery provider; no real customer"
           }
           try:

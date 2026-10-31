@@ -19,7 +19,7 @@ body{font-family:system-ui,-apple-system,sans-serif;max-width:900px;margin:0 aut
 .pilot-form{margin:22px 0 16px;background:#f7faf8;border:1px solid #c6d5cd;border-radius:17px;padding:23px}.pilot-form h2{margin:0 0 6px}.pilot-form label{display:block;font-size:13px;font-weight:750;margin:14px 0 5px}.pilot-form input,.pilot-form select,.pilot-form textarea{width:100%;padding:11px;border:1px solid #abbcaf;border-radius:8px;font:inherit;background:white;color:#122319}.pilot-form textarea{min-height:85px}.form-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.form-actions .cta{margin:0;cursor:pointer}.cta.secondary{background:#fff;color:#111;border:1px solid #888}.pilot-form input:focus,.pilot-form select:focus,.pilot-form textarea:focus{outline:2px solid #2c604b}.pilot-form label.consent{display:flex;align-items:flex-start;gap:10px;line-height:1.45;margin-top:18px;font-weight:500}.pilot-form .consent input{width:18px;height:18px;flex:none;margin:4px 0}.pilot-form button[disabled]{opacity:.65;cursor:wait}
 </style>
 </head>
-<body data-release="pilot-lead-v3-20261020">
+<body data-release="pilot-lead-v4-20261031">
 <section class="hero">
 <div class="eyebrow">NexusEval production pilot</div>
 <h1>Stop weak or risky AI marketing before it reaches customers.</h1>
@@ -87,7 +87,7 @@ body{font-family:system-ui,-apple-system,sans-serif;max-width:900px;margin:0 aut
     try{
       var controller=new AbortController(),timer=setTimeout(function(){controller.abort()},14000);
       var response;
-      try{response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({email:v.email,company:v.company,workflow:v.workflow,message:v.notes||'Scope to be discussed',_subject:'[NEXUSEVAL PILOT LEAD] New $99 enquiry',_honey:'',_captcha:'false',source:'NexusEval public pilot landing page'}),signal:controller.signal})}
+      try{response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({email:v.email,company:v.company,workflow:v.workflow,message:v.notes||'Scope to be discussed',_subject:'[NEXUSEVAL PILOT LEAD] New $99 enquiry',_honey:'',_captcha:'false',_url:'https://nexuseval-demand-mesh.vercel.app/pilot',source:'NexusEval public pilot landing page'}),signal:controller.signal})}
       finally{clearTimeout(timer)}
       var result=await response.json();
       if(!response.ok||String(result.success)!=='true')throw Error('Submission unavailable');

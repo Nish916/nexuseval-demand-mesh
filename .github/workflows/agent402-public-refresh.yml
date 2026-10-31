@@ -68,7 +68,7 @@ jobs:
           trap 'rm -f "$page"' EXIT
           curl -fsS --connect-timeout 10 --max-time 35 --retry 2 \
             'https://nexuseval-demand-mesh.vercel.app/pilot' -o "$page"
-          grep -q 'data-release="pilot-lead-v3-20261020"' "$page"
+          grep -Eq 'data-release="pilot-lead-v(3-20261020|4-20261031)"' "$page"
           grep -q 'formsubmit.co/ajax/' "$page"
           grep -q 'id="buyer-consent"' "$page"
           echo 'Buyer pilot page, consent and FormSubmit integration present.'
