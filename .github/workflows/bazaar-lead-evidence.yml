@@ -2,10 +2,6 @@ name: Bazaar and Pilot Evidence
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/bazaar-lead-evidence.yml'
 
 permissions:
   contents: read
@@ -114,7 +110,7 @@ jobs:
           }
           try:
               c,h,b=request(target,method="POST",data=json.dumps(qa).encode("utf-8"),
-                  extra={"Content-Type":"application/json","Origin":"https://nexuseval-demand-mesh.vercel.app"},timeout=30)
+                  extra={"Content-Type":"application/json","Origin":"https://nexuseval-demand-mesh.vercel.app", "Referer":"https://nexuseval-demand-mesh.vercel.app/pilot"},timeout=30)
               out=json.loads(b)
               ok=c in (200,201) and str(out.get("success","")).lower()=="true"
               print("FORM_PROVIDER_QA_HTTP="+str(c)+"; success="+str(out.get("success")))
