@@ -1,0 +1,74 @@
+name: NexusEval Public Agent402 Refresh
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/agent402-public-refresh.yml'
+  schedule:
+    - cron: '11 4 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexuseval-public-agent402-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Verify paid source is live without paying
+        shell: bash
+        run: |
+          set -euo pipefail
+          tempdir="$(mktemp -d)"
+          trap 'rm -rf "$tempdir"' EXIT
+          curl -fsS --connect-timeout 10 --max-time 35 --retry 2 \
+            'https://nexuseval.vercel.app/.well-known/x402' -o "$tempdir/manifest.json"
+          jq -e '.resources | type == "array" and length > 0' "$tempdir/manifest.json" >/dev/null
+          jq -e '.payment.x402.payTo | type == "string" and length > 0' "$tempdir/manifest.json" >/dev/null
+          code="$(curl -sS --connect-timeout 10 --max-time 35 \
+            -H 'content-type: application/json' \
+            -H 'x-nexus-observer: public-agent402-refresh' \
+            -X POST 'https://nexuseval.vercel.app/api/gate' \
+            --data '{"objective":"read-only uptime check","audience":"CI","headline":"QA","copy":"QA","cta":"QA"}' \
+            -o "$tempdir/challenge" -w '%{http_code}')"
+          test "$code" = '402'
+          echo "Manifest valid; unpaid POST returns 402; no payment sent."
+
+      - name: Request Agent402 public index refresh
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(mktemp)"
+          trap 'rm -f "$response"' EXIT
+          code="$(curl -sS --connect-timeout 10 --max-time 40 --retry 2 --retry-delay 3 \
+            -X POST 'https://agent402.tools/api/index/register' \
+            -H 'content-type: application/json' \
+            -H 'accept: application/json' \
+            -H 'user-agent: NexusEval-Public-Refresh/1.0' \
+            --data '{"origin":"https://nexuseval.vercel.app"}' \
+            -o "$response" -w '%{http_code}' || true)"
+          echo "Agent402 registration response HTTP \${code:-none}"
+          if [[ "\${code:-}" =~ ^2[0-9][0-9]$ ]]; then
+            echo 'Agent402 registration request accepted.'
+          else
+            echo '::warning::Agent402 is unavailable or declined refresh; NexusEval paid surface remains independently verified.'
+          fi
+
+      - name: Check human buyer entry without submitting a lead
+        shell: bash
+        run: |
+          set -euo pipefail
+          page="$(mktemp)"
+          trap 'rm -f "$page"' EXIT
+          curl -fsS --connect-timeout 10 --max-time 35 --retry 2 \
+            'https://nexuseval-demand-mesh.vercel.app/pilot' -o "$page"
+          grep -q 'data-release="pilot-lead-v3-20261020"' "$page"
+          grep -q 'formsubmit.co/ajax/' "$page"
+          grep -q 'id="buyer-consent"' "$page"
+          echo 'Buyer pilot page, consent and FormSubmit integration present.'
