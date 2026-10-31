@@ -1,0 +1,127 @@
+name: Bazaar and Pilot Evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bazaar-lead-evidence.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify seller discovery and genuine pilot delivery channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, time, urllib.request, urllib.error, urllib.parse, sys
+
+          UA="NexusEval-Evidence/2026-10-31"
+          wallet="0x756a9769725af78f81fb0a9b66300abb64a0551c"
+          def request(url, method="GET", data=None, extra=None, timeout=30):
+              headers={"User-Agent": UA, "Accept":"application/json"}
+              headers.update(extra or {})
+              req=urllib.request.Request(url,data=data,headers=headers,method=method)
+              try:
+                  with urllib.request.urlopen(req, timeout=timeout) as r:
+                      return r.status, dict(r.headers.items()), r.read()
+              except urllib.error.HTTPError as e:
+                  return e.code, dict(e.headers.items()), e.read()
+
+          base="https://nexuseval.vercel.app"
+          get_url=base+"/api/gate-buy?copy=Internal%20Bazaar%20health%20check"
+          status, headers, body=request(get_url)
+          assert status==402, "GET paid resource must return 402, got "+str(status)
+          challenge=json.loads(body)
+          bazaar=challenge.get("extensions",{}).get("bazaar",{})
+          assert challenge.get("x402Version")==2
+          assert bazaar.get("info",{}).get("input",{}).get("method")=="GET"
+          assert challenge.get("resource",{}).get("url")==get_url, "Canonical URL changed"
+          assert challenge["accepts"][0]["payTo"].lower()==wallet
+          assert "offer-receipt" in challenge.get("extensions",{})
+          print("PAID_GET_HTTP=402")
+          print("PAID_GET_CANONICAL="+get_url)
+          print("PAID_GET_BAZAAR_EXTENSION=present")
+          print("PAID_GET_X402_VERSION=2; method=GET; priceUSDC=0.01; network=eip155:8453")
+          print("CLIENT_SDK=@x402/express @x402/core @x402/extensions ^2.24.0")
+          print("NOTICE=No payment payload signed or verified; EXTENSION-RESPONSES not yet available.")
+
+          for url in (base+"/discovery/listing-status",
+                      "https://facilitator.payai.network/discovery/listing-status"):
+              try:
+                  c,h,b=request(url,timeout=20)
+                  print("LISTING_STATUS_LOOKUP="+url+" HTTP="+str(c))
+              except Exception as e:
+                  print("LISTING_STATUS_LOOKUP="+url+" error="+type(e).__name__)
+
+          catalog="https://facilitator.payai.network/discovery/resources"
+          matches=[]
+          count=0
+          total=None
+          for page in range(40):
+              url=catalog+"?type=http&limit=1000&offset="+str(page*1000)
+              c,h,b=request(url,timeout=35)
+              if c!=200:
+                  print("PAYAI_CATALOG_HTTP_ERROR="+str(c)+" offset="+str(page*1000))
+                  sys.exit(2)
+              d=json.loads(b)
+              items=d.get("items",[])
+              if not isinstance(items,list):raise RuntimeError("No Bazaar items array")
+              if total is None:
+                  total=d.get("pagination",{}).get("total")
+              count+=len(items)
+              for v in items:
+                  resource=str(v.get("resource") or "")
+                  paytos=[str(a.get("payTo","")).lower() for a in (v.get("accepts") or []) if isinstance(a,dict)]
+                  if "nexuseval.vercel.app" in resource or wallet in paytos:
+                      matches.append({"resource":resource,"method":v.get("method"),"lastUpdated":v.get("lastUpdated")})
+              if not items or (isinstance(total,int) and count>=total):
+                  break
+              time.sleep(0.25)
+          print("PAYAI_CATALOG_SCANNED="+str(count)+"; reported_total="+str(total))
+          print("PAYAI_NEXUSEVAL_MATCHES="+str(len(matches)))
+          for m in matches[:12]:print("MATCH="+json.dumps(m))
+          if isinstance(total,int) and count<total:
+              print("WARNING=Catalogue pagination incomplete")
+              sys.exit(3)
+
+          pilot="https://nexuseval-demand-mesh.vercel.app/pilot"
+          c,h,b=request(pilot,extra={"Accept":"text/html"},timeout=30)
+          assert c==200, "Pilot HTTP "+str(c)
+          html=b.decode("utf-8",errors="replace")
+          for k in ('data-release="pilot-lead-v3-20261020"','formsubmit.co/ajax/','id="buyer-consent"','lead_submitted_confirmed'):
+              assert k in html, "Pilot missing "+k
+          print("PILOT_LIVE_HTML=200; form, consent, tracking marker present")
+
+          # A single unmistakably internal QA request. No customer, transaction or lead claim.
+          target="https://formsubmit.co/ajax/nishants916@gmail.com"
+          qa={
+              "email":"nishants916@gmail.com",
+              "company":"INTERNAL QA - NOT A BUYER",
+              "workflow":"Other marketing workflow",
+              "message":"NEXUSEVAL-LEAD-QA-20261031: testing delivery only; no customer, no payment, no sales enquiry.",
+              "_subject":"[NEXUSEVAL QA ONLY] October 31 delivery verification",
+              "_honey":"",
+              "_captcha":"false",
+              "source":"Internal QA through public pilot form delivery provider; no real customer"
+          }
+          try:
+              c,h,b=request(target,method="POST",data=json.dumps(qa).encode("utf-8"),
+                  extra={"Content-Type":"application/json","Origin":"https://nexuseval-demand-mesh.vercel.app"},timeout=30)
+              out=json.loads(b)
+              ok=c in (200,201) and str(out.get("success","")).lower()=="true"
+              print("FORM_PROVIDER_QA_HTTP="+str(c)+"; success="+str(out.get("success")))
+              if not ok:
+                  print("FORM_PROVIDER_RESPONSE="+str(out.get("message",""))[:240])
+                  sys.exit(4)
+          except Exception as e:
+              print("FORM_PROVIDER_TEST_ERROR="+str(e)[:200])
+              sys.exit(4)
+          print("FORM_PROVIDER_QA_ACCEPTED=true; inbox receipt requires independent Gmail confirmation")
+          PY
